@@ -68,10 +68,11 @@ app.post('/uploadFile', (req, res) => {
   const body =  req.body;
   csv2json(body.data)
     .then((data) => {
-        const dataEvents = alasql('SELECT DISTINCT name from ? WHERE', [data]); 
+        const dataEvents = alasql('SELECT DISTINCT name from ?', [data]); 
         res.send(dataEvents);
     })
     .catch((error) => {
+      console.log(error)
       res.status(500).send('Something broke!');
     });
 });
