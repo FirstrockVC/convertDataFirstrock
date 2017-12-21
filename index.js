@@ -62,6 +62,10 @@ app.use((req, res, next) => {
 
 // Initial API Endpoint
 app.get('/', (req, res) => {
+  res.json({ api: 'V1.0', description: 'convert API'});
+});
+
+app.post('/uploadFile', (req, res) => {
   const body =  req.body;
   csv2json(body.data)
     .then((data) => {
