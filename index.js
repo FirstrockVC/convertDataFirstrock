@@ -77,7 +77,7 @@ app.post('/uploadFile', (req, res) => {
 
 app.post('/convertCulumative', (req, res) => {
   const body = req.body;  
-  convertCulumative(body.event,dataFile)
+  convertCulumative("Focused 10 Minutes",dataFile)
     .then((data) => {
         res.send(data);
     }).catch((error) => {
