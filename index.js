@@ -10,6 +10,7 @@ const moment = momentRange.extendMoment(Moment);
 
 alasql.fn.moment = moment;
 const app = express();
+let dataFile;
 
 /**
  * Wrapper method to convert CSV into JSON and format dates
@@ -18,12 +19,11 @@ const app = express();
  */
 const csv2json = (data) => {
   return new Promise((success, reject) => {
-    let csv_data = [];
     // Transform CSV into JSON
     csv()
       .fromString(data)
       .on('json',(jsonObj)=>{
-        csv_data.push({
+        dataFile.push({
           distinct_id: jsonObj.distinct_id,
           name: jsonObj.name, 
           time: jsonObj.time,         
@@ -34,7 +34,7 @@ const csv2json = (data) => {
         if(error) {
           reject(error);
         } else {
-          success(csv_data);
+          success(dataFile);
         }
       })
   });
@@ -72,44 +72,12 @@ app.post('/uploadFile', (req, res) => {
         res.send(dataEvents);
     })
     .catch((error) => {
-      console.log(error)
       res.status(500).send('Something broke!');
     });
 });
 
 app.get('/convert', (req, res) => {
-  const body =  req.body;
-  csv2json(body.data)
-    .then((data) => {
-        const minDate = alasql('select date from ? WHERE name="Focused 10 Minutes" ORDER BY time ASC limit 1', [data]);
-        const maxDate = alasql('select date from ? WHERE name="Focused 10 Minutes" ORDER BY time DESC limit 1', [data]);
-        const range = moment.range(moment(minDate[0].date).format('MM/DD/YYYY'), moment(maxDate[0].date).format('MM/DD/YYYY')); 
-        const datafinal = [];
-        let cumulative = 0;
-        let day = 1;
-        const dataFilterEvent = alasql('SELECT DISTINCT distinct_id from ? WHERE name="Focused 10 Minutes"', [data]); 
-        _.forEach(dataFilterEvent, (event, key) => {
-            const user = event.distinct_id;
-            cumulative = 0;
-            day = 1;
-            const resultConvert = alasql('SELECT COUNT(time) * 10 AS cumulative,distinct_id,date from ? WHERE name="Focused 10 Minutes" AND distinct_id= "'+ event.distinct_id + '" GROUP BY date, distinct_id ORDER BY date', [data]); 
-            for (let object of resultConvert) {                
-              cumulative += object.cumulative; 
-                datafinal.push({
-                  'cohort_person': user, 
-                  'activity_day': 'Day' + day++,
-                  'cumulative': cumulative,
-                  'unic': object.cumulative,
-                  'date': object.date
-                  });
-            }
-        });
-        res.csv(datafinal);
-    })
-    .catch((error) => {
-        console.log(error);
-      res.status(500).send('Something broke!');
-    })
+  res.send(dataFile);
 });
 
 app.listen(process.env.PORT || 3000, ()=> {
