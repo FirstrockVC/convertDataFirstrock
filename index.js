@@ -78,7 +78,7 @@ app.post('/uploadFile', (req, res) => {
 
 app.post('/convertCulumative', (req, res) => {
   const body = req.body;  
-  convertCulumative(body.event,dataFile)
+  convertCulumative(body.event,body.quantity,dataFile)
     .then((data) => {
         res.send(data);
     }).catch((error) => {
@@ -87,7 +87,7 @@ app.post('/convertCulumative', (req, res) => {
     });
 });
 
-const convertCulumative = (eventType, data) => {
+const convertCulumative = (eventType,quantity, data) => {
   return new Promise((success, reject) => {
     // Transform CSV into JSON
       const minDate = alasql('select date from ? WHERE name="'+eventType+'" ORDER BY time ASC limit 1', [data]);
@@ -101,7 +101,7 @@ const convertCulumative = (eventType, data) => {
           const user = event.distinct_id;
           cumulative = 0;
           day = 1;
-          const resultConvert = alasql('SELECT COUNT(time) * 10 AS cumulative,distinct_id,date from ? WHERE name="'+eventType+'" AND distinct_id="'+ event.distinct_id + '" GROUP BY date, distinct_id ORDER BY date', [data]); 
+          const resultConvert = alasql('SELECT COUNT(time) * '+ quantity +' AS cumulative,distinct_id,date from ? WHERE name="'+eventType+'" AND distinct_id="'+ event.distinct_id + '" GROUP BY date, distinct_id ORDER BY date', [data]); 
           for (let result of resultConvert) {                
             cumulative += result.cumulative; 
             report.push({
