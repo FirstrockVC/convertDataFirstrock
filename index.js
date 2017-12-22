@@ -10,7 +10,7 @@ const moment = momentRange.extendMoment(Moment);
 
 alasql.fn.moment = moment;
 const app = express();
-let dataFile;
+let dataFile = [];
 
 /**
  * Wrapper method to convert CSV into JSON and format dates
