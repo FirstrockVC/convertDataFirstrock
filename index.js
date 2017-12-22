@@ -81,6 +81,7 @@ app.post('/convertCulumative', (req, res) => {
     .then((data) => {
         res.send(data);
     }).catch((error) => {
+      console.log(error);
       res.status(500).send('Something broke!');
     });
 });
@@ -88,18 +89,18 @@ app.post('/convertCulumative', (req, res) => {
 const convertCulumative = (eventType, data) => {
   return new Promise((success, reject) => {
     // Transform CSV into JSON
-      const minDate = alasql('select date from ? WHERE name='+eventType+' ORDER BY time ASC limit 1', [data]);
-      const maxDate = alasql('select date from ? WHERE name='+eventType+' ORDER BY time DESC limit 1', [data]);
+      const minDate = alasql('select date from ? WHERE name="'+eventType+'" ORDER BY time ASC limit 1', [data]);
+      const maxDate = alasql('select date from ? WHERE name="'+eventType+'" ORDER BY time DESC limit 1', [data]);
       const range = moment.range(moment(minDate[0].date).format('MM/DD/YYYY'), moment(maxDate[0].date).format('MM/DD/YYYY')); 
       const report = [];
       let cumulative = 0;
       let day = 1;
-      const dataFilterEvent = alasql('SELECT DISTINCT distinct_id from ? WHERE name='+eventType, [data]); 
+      const dataFilterEvent = alasql('SELECT DISTINCT distinct_id from ? WHERE name="'+eventType+'"', [data]); 
       _.forEach(dataFilterEvent, (event, key) => {
           const user = event.distinct_id;
           cumulative = 0;
           day = 1;
-          const resultConvert = alasql('SELECT COUNT(time) * 10 AS cumulative,distinct_id,date from ? WHERE name='+eventType+' AND distinct_id= "'+ event.distinct_id + '" GROUP BY date, distinct_id ORDER BY date', [data]); 
+          const resultConvert = alasql('SELECT COUNT(time) * 10 AS cumulative,distinct_id,date from ? WHERE name="'+eventType+'" AND distinct_id="'+ event.distinct_id + '" GROUP BY date, distinct_id ORDER BY date', [data]); 
           for (let result of resultConvert) {                
             cumulative += result.cumulative; 
             report.push({
