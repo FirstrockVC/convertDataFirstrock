@@ -18,6 +18,7 @@ let dataFile = [];
  * @returns {Promise}
  */
 const csv2json = (data) => {
+  dataFile = [];  
   return new Promise((success, reject) => {
     // Transform CSV into JSON
     csv()
