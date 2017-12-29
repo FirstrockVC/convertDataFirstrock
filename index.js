@@ -135,7 +135,7 @@ const convertCulumative = (eventType,quantity, data) => {
 }; 
 
 app.get('/convertKIP', (req, res) => {
-  const datafilter = alasql('SELECT SUM(users) AS comulativeusers, moment(activity_month).format("MMM DD YYYY") from ? GROUP BY activity_month', [dataFile]); 
+  const datafilter = alasql('SELECT SUM(users) AS comulativeusers, moment(activity_month).format("MMM DD YYYY") AS month from ? GROUP BY activity_month', [dataFile]); 
   res.send(datafilter);
 });
 
