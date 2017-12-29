@@ -74,7 +74,7 @@ app.get('/', (req, res) => {
   res.json({ api: 'V1.0', description: 'convert API'});
 });
 
-app.get('/uploadFile', (req, res) => {
+app.post('/uploadFile', (req, res) => {
   const body = req.body;
   csv2json(body.data, body.type)
     .then((data) => {
