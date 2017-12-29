@@ -17,19 +17,28 @@ let dataFile = [];
  * @param filename
  * @returns {Promise}
  */
-const csv2json = (data) => {
+const csv2json = (data,type) => {
   dataFile = [];  
   return new Promise((success, reject) => {
     // Transform CSV into JSON
     csv()
       .fromString(data)
       .on('json',(jsonObj)=>{
-        dataFile.push({
-          distinct_id: jsonObj.distinct_id,
-          name: jsonObj.name, 
-          time: jsonObj.time,         
-          date: moment(Number(jsonObj.time)).format('MM/DD/YYYY')
-        });
+        if (type){
+          dataFile.push({
+            cohort_month: jsonObj.cohort_month,
+            activity_month: jsonObj.activity_month, 
+            users: Number(jsonObj.users),         
+            revenue: jsonObj.revenue
+          });
+        }else{
+          dataFile.push({
+            distinct_id: jsonObj.distinct_id,
+            name: jsonObj.name, 
+            time: jsonObj.time,         
+            date: moment(Number(jsonObj.time)).format('MM/DD/YYYY')
+          });
+        }
       })
       .on('done',(error)=>{
         if(error) {
@@ -67,10 +76,14 @@ app.get('/', (req, res) => {
 
 app.post('/uploadFile', (req, res) => {
   const body = req.body;
-  csv2json(body.data)
+  csv2json(body.data, body.type)
     .then((data) => {
+      if (body.type){
+        res.send(data);        
+      }else{
         const dataEvents = alasql('SELECT DISTINCT name from ?', [data]); 
         res.send(dataEvents);
+      }
     }).catch((error) => {
       res.status(500).send('Something broke!');
     });
@@ -120,6 +133,11 @@ const convertCulumative = (eventType,quantity, data) => {
       }
   });
 }; 
+
+app.get('/convertKIP', (req, res) => {
+  const datafilter = alasql('SELECT SUM(users) AS comulativeusers, activity_month from ? GROUP BY activity_month', [dataFile]); 
+  res.send(datafilter);
+});
 
 app.listen(process.env.PORT || 3000, ()=> {
   console.log('Example app listening on port 3000!');
