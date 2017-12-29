@@ -159,7 +159,7 @@ app.get('/convertretentioncohort', (req, res) => {
           'cohort_month': event.cohort_month, 
           "activity_day": result.activity_month,
           "users": result.users,
-          "percen": percen,
+          "percen": _.round(percen),
           "month":  month++
           });
     }
