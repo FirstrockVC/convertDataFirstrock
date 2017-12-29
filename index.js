@@ -74,7 +74,7 @@ app.get('/', (req, res) => {
   res.json({ api: 'V1.0', description: 'convert API'});
 });
 
-app.post('/uploadFile', (req, res) => {
+app.get('/uploadFile', (req, res) => {
   const body = req.body;
   csv2json(body.data, body.type)
     .then((data) => {
@@ -135,8 +135,36 @@ const convertCulumative = (eventType,quantity, data) => {
 }; 
 
 app.get('/convertKIP', (req, res) => {
-  const datafilter = alasql('SELECT SUM(users) AS comulativeusers, moment(activity_month).format("MMM DD YYYY") AS month from ? GROUP BY activity_month', [dataFile]); 
+  const datafilter = alasql('SELECT SUM(users) AS cumulativeusers, moment(activity_month).format("MMM DD YYYY") AS month from ? GROUP BY activity_month', [dataFile]); 
   res.send(datafilter);
+});
+
+app.get('/convertretentioncohort', (req, res) => {
+  const cohorst = _.uniqBy(dataFile, 'cohort_month');
+  const report = [];
+  let month= 0;
+  let percen= 0;
+  let userspercen= 0;
+  _.forEach(cohorst, (event, key) => {
+    month = 1;
+    const resultConvert = alasql('SELECT * from ? WHERE cohort_month="'+ event.cohort_month + '"', [dataFile]); 
+    for (let result of resultConvert) {  
+      if (event.cohort_month === result.activity_month) {
+        percen = 100;
+        userspercen = result.users;
+      } else{
+        percen = (result.users / userspercen) * 100;
+      }             
+      report.push({
+          'cohort_month': event.cohort_month, 
+          "activity_day": result.activity_month,
+          "users": result.users,
+          "percen": percen,
+          "month":  month++
+          });
+    }
+});
+  res.send(report);
 });
 
 app.listen(process.env.PORT || 3000, ()=> {
