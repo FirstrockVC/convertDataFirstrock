@@ -77,8 +77,8 @@ app.get('/', (req, res) => {
 app.post('/uploadFile', (req, res) => {
   const body = req.body;
   csv2json(body.data, body.type)
-    .then((data) => {
-      if (body.type){
+    .then((body.type) => {
+      if (true){
         res.send(data);        
       }else{
         const dataEvents = alasql('SELECT DISTINCT name from ?', [data]); 
@@ -159,6 +159,34 @@ app.get('/convertretentioncohort', (req, res) => {
           "activity_day": result.activity_month,
           "users": result.users,
           "percen": _.round(percen),
+          "month":  month++
+          });
+    }
+});
+  res.send(report);
+});
+
+app.get('/convertmaucohort', (req, res) => {
+  const cohorst = _.uniqBy(dataFile, 'cohort_month');
+  const report = [];
+  let month= 0;
+  let initUsers= 0;
+  let customerRe= 0;
+  _.forEach(cohorst, (event, key) => {
+    month = 0;
+    const resultConvert = alasql('SELECT * from ? WHERE cohort_month="'+ event.cohort_month + '"', [dataFile]); 
+    for (let result of resultConvert) {  
+      if (event.cohort_month === result.activity_month) {
+        initUsers = result.users;
+      }
+      const data = result.users/initUsers;
+      customerRe += data; 
+      report.push({
+          'cohort_month': event.cohort_month, 
+          "activity_day": result.activity_month,
+          "users": result.users,
+          "customerRe": data,
+          "cumulative": customerRe,
           "month":  month++
           });
     }
