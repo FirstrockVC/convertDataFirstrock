@@ -77,8 +77,8 @@ app.get('/', (req, res) => {
 app.post('/uploadFile', (req, res) => {
   const body = req.body;
   csv2json(body.data, body.type)
-    .then((body.type) => {
-      if (true){
+    .then((data) => {
+      if (body.type){
         res.send(data);        
       }else{
         const dataEvents = alasql('SELECT DISTINCT name from ?', [data]); 
