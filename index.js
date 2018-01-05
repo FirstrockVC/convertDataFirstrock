@@ -174,6 +174,7 @@ app.get('/convertmaucohort', (req, res) => {
   let customerRe= 0;
   _.forEach(cohorst, (event, key) => {
     month = 0;
+    customerRe = 0;
     const resultConvert = alasql('SELECT * from ? WHERE cohort_month="'+ event.cohort_month + '"', [dataFile]); 
     for (let result of resultConvert) {  
       if (event.cohort_month === result.activity_month) {
