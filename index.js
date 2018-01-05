@@ -188,6 +188,7 @@ app.get('/convertmaucohort', (req, res) => {
           "users": result.users,
           "customerRe": data,
           "cumulative": customerRe,
+          "customerRePer": _.round(data * 100),
           "month":  month++
           });
     }
