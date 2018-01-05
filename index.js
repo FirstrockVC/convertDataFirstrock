@@ -183,7 +183,8 @@ app.get('/convertmaucohort', (req, res) => {
       const data = result.users/initUsers;
       customerRe += data; 
       report.push({
-          'cohort_month': event.cohort_month, 
+          "cohort_month": event.cohort_month, 
+          "cohort_month_format": moment(event.cohort_month).format("MMM DD YYYY"),
           "activity_day": result.activity_month,
           "users": result.users,
           "customerRe": data,
