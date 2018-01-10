@@ -201,25 +201,26 @@ app.get('/convertxlayer', (req, res) => {
   const cohorst = _.uniqBy(dataFile, 'cohort_month');
   const report = [];
   const numbermonth = cohorst.length;
-  let month= cohorst[0].cohort_month;
-  
+  let months= [];
   _.forEach(cohorst, (event, key) => {
     const resultConvert = alasql('SELECT * from ? WHERE cohort_month="'+ event.cohort_month + '"', [dataFile]); 
-    if (!_.find(resultConvert,[ 'activity_month', month ])){
-      report.push({
-        "cohort_month": event.cohort_month, 
-        "activity_day": month,
-        "users": 0,
-        });
+    for (let month of months) { 
+      if (!_.find(resultConvert,[ 'activity_month', month])){
+        report.push({
+          "cohort_month": event.cohort_month, 
+          "activity_day": month,
+          "users": 0,
+          });
+      }
     }
     for (let result of resultConvert) { 
-        report.push({
-        "cohort_month": event.cohort_month, 
-        "activity_day": result.activity_month,
-        "users": result.users,
-        });
+          report.push({
+          "cohort_month": event.cohort_month, 
+          "activity_day": result.activity_month,
+          "users": result.users,
+    });
     }
-    month = event.cohort_month;
+    months.push(event.cohort_month);
   });
   res.send(report);
 });
