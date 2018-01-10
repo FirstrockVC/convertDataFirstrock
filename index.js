@@ -209,7 +209,7 @@ app.get('/convertxlayer', (req, res) => {
         report.push({
           "cohort_month": event.cohort_month, 
           "activity_day": month,
-          "users": 0,
+          "users": null,
           });
       }
     }
