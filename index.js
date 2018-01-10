@@ -75,7 +75,7 @@ app.get('/', (req, res) => {
 });
 
 app.post('/uploadFile', (req, res) => {
-  const body = req.body;
+const body = req.body;
   csv2json(body.data, body.type)
     .then((data) => {
       if (body.type){
@@ -194,6 +194,33 @@ app.get('/convertmaucohort', (req, res) => {
           });
     }
 });
+  res.send(report);
+});
+
+app.get('/convertxlayer', (req, res) => {
+  const cohorst = _.uniqBy(dataFile, 'cohort_month');
+  const report = [];
+  const numbermonth = cohorst.length;
+  let month= cohorst[0].cohort_month;
+  
+  _.forEach(cohorst, (event, key) => {
+    const resultConvert = alasql('SELECT * from ? WHERE cohort_month="'+ event.cohort_month + '"', [dataFile]); 
+    if (!_.find(resultConvert,[ 'activity_month', month ])){
+      report.push({
+        "cohort_month": event.cohort_month, 
+        "activity_day": month,
+        "users": 0,
+        });
+    }
+    for (let result of resultConvert) { 
+        report.push({
+        "cohort_month": event.cohort_month, 
+        "activity_day": result.activity_month,
+        "users": result.users,
+        });
+    }
+    month = event.cohort_month;
+  });
   res.send(report);
 });
 
