@@ -220,7 +220,7 @@ app.get('/convertxlayer', (req, res) => {
           "users": result.users,
     });
     }
-    months.push(event.cohort_month);
+    periods.push(event.cohort_period);
   });
   res.send(report);
 });
