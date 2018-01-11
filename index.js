@@ -26,8 +26,8 @@ const csv2json = (data,type) => {
       .on('json',(jsonObj)=>{
         if (type){
           dataFile.push({
-            cohort_month: jsonObj.cohort_month,
-            activity_month: jsonObj.activity_month, 
+            cohort_period: jsonObj.cohort_period,
+            activity_period: jsonObj.activity_period, 
             users: Number(jsonObj.users),         
             revenue: jsonObj.revenue
           });
@@ -133,33 +133,33 @@ const convertCulumative = (eventType,quantity, data) => {
   });
 }; 
 
-app.get('/convertKIP', (req, res) => {
-  const datafilter = alasql('SELECT SUM(users) AS cumulativeusers, moment(activity_month).format("MMM DD YYYY") AS month from ? GROUP BY activity_month', [dataFile]); 
+app.get('/convertkip', (req, res) => {
+  const datafilter = alasql('SELECT SUM(users) AS cumulativeusers, moment(activity_period).format("MMM DD YYYY") AS period from ? GROUP BY activity_period', [dataFile]); 
   res.send(datafilter);
 });
 
 app.get('/convertretentioncohort', (req, res) => {
-  const cohorst = _.uniqBy(dataFile, 'cohort_month');
+  const cohorst = _.uniqBy(dataFile, 'cohort_period');
   const report = [];
-  let month= 0;
+  let period= 0;
   let percen= 0;
   let userspercen= 0;
   _.forEach(cohorst, (event, key) => {
-    month = 0;
-    const resultConvert = alasql('SELECT * from ? WHERE cohort_month="'+ event.cohort_month + '"', [dataFile]); 
+    period = 0;
+    const resultConvert = alasql('SELECT * from ? WHERE cohort_period="'+ event.cohort_period + '"', [dataFile]); 
     for (let result of resultConvert) {  
-      if (event.cohort_month === result.activity_month) {
+      if (event.cohort_period === result.activity_period) {
         percen = 100;
         userspercen = result.users;
       } else{
         percen = (result.users / userspercen) * 100;
       }             
       report.push({
-          'cohort_month': event.cohort_month, 
-          "activity_day": result.activity_month,
+          'cohort_period': event.cohort_period, 
+          "activity_period": result.activity_period,
           "users": result.users,
           "percen": _.round(percen),
-          "month":  month++
+          "period":  period++
           });
     }
 });
@@ -167,30 +167,30 @@ app.get('/convertretentioncohort', (req, res) => {
 });
 
 app.get('/convertmaucohort', (req, res) => {
-  const cohorst = _.uniqBy(dataFile, 'cohort_month');
+  const cohorst = _.uniqBy(dataFile, 'cohort_period');
   const report = [];
-  let month= 0;
+  let period= 0;
   let initUsers= 0;
   let customerRe= 0;
   _.forEach(cohorst, (event, key) => {
-    month = 0;
+    period = 0;
     customerRe = 0;
-    const resultConvert = alasql('SELECT * from ? WHERE cohort_month="'+ event.cohort_month + '"', [dataFile]); 
+    const resultConvert = alasql('SELECT * from ? WHERE cohort_period="'+ event.cohort_period + '"', [dataFile]); 
     for (let result of resultConvert) {  
-      if (event.cohort_month === result.activity_month) {
+      if (event.cohort_period === result.activity_period) {
         initUsers = result.users;
       }
       const data = result.users/initUsers;
       customerRe += data; 
       report.push({
-          "cohort_month": event.cohort_month, 
-          "cohort_month_format": moment(event.cohort_month).format("MMM DD YYYY"),
-          "activity_day": result.activity_month,
+          "cohort_period": event.cohort_period, 
+          "cohort_period_format": moment(event.cohort_period).format("MMM DD YYYY"),
+          "activity_period": result.activity_period,
           "users": result.users,
           "customerRe": data,
           "cumulative": customerRe,
           "customerRePer": _.round(data * 100, 2),
-          "month":  month++
+          "period":  period++
           });
     }
 });
@@ -198,25 +198,25 @@ app.get('/convertmaucohort', (req, res) => {
 });
 
 app.get('/convertxlayer', (req, res) => {
-  const cohorst = _.uniqBy(dataFile, 'cohort_month');
+  const cohorst = _.uniqBy(dataFile, 'cohort_period');
   const report = [];
-  const numbermonth = cohorst.length;
-  let months= [];
+  const numberPeriod = cohorst.length;
+  let periods= [];
   _.forEach(cohorst, (event, key) => {
-    const resultConvert = alasql('SELECT * from ? WHERE cohort_month="'+ event.cohort_month + '"', [dataFile]); 
-    for (let month of months) { 
-      if (!_.find(resultConvert,[ 'activity_month', month])){
+    const resultConvert = alasql('SELECT * from ? WHERE cohort_period="'+ event.cohort_period + '"', [dataFile]); 
+    for (let period of periods) { 
+      if (!_.find(resultConvert,[ 'activity_period', period])){
         report.push({
-          "cohort_month": event.cohort_month, 
-          "activity_day": month,
+          "cohort_period": event.cohort_period, 
+          "activity_period": period,
           "users": null,
           });
       }
     }
     for (let result of resultConvert) { 
           report.push({
-          "cohort_month": event.cohort_month, 
-          "activity_day": result.activity_month,
+          "cohort_period": event.cohort_period, 
+          "activity_period": result.activity_period,
           "users": result.users,
     });
     }
