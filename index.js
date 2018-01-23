@@ -215,8 +215,8 @@ app.get('/convertxlayer', (req, res) => {
       }
     }
     for (let result of resultConvert) {
-      let comulative = 0;
-          for (let object of data){
+          for (let object of data){      
+            let comulative = 0;
             if (object.activity_period === result.activity_period){
               comulative += object.users;
             }
@@ -229,7 +229,6 @@ app.get('/convertxlayer', (req, res) => {
           report.push(cohort);
           data.push(cohort);
     }
-    data.push(resultConvert);
     periods.push(event.cohort_period);
   });
   res.send(report);
