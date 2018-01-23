@@ -211,6 +211,7 @@ app.get('/convertxlayer', (req, res) => {
           "cohort_period": event.cohort_period, 
           "activity_period": period,
           "users": null,
+          "cumulative": null,
           });
       }
     }
