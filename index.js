@@ -141,11 +141,11 @@ app.get('/convertkip', (req, res) => {
 app.get('/convertretentioncohort', (req, res) => {
   const cohorst = _.uniqBy(dataFile, 'cohort_period');
   const report = [];
-  let period= 0;
+  let period= 1;
   let percen= 0;
   let userspercen= 0;
   _.forEach(cohorst, (event, key) => {
-    period = 0;
+    period = 1;
     const resultConvert = alasql('SELECT * from ? WHERE cohort_period="'+ event.cohort_period + '"', [dataFile]); 
     for (let result of resultConvert) {  
       if (event.cohort_period === result.activity_period) {
@@ -169,11 +169,11 @@ app.get('/convertretentioncohort', (req, res) => {
 app.get('/convertmaucohort', (req, res) => {
   const cohorst = _.uniqBy(dataFile, 'cohort_period');
   const report = [];
-  let period= 0;
+  let period= 1;
   let initUsers= 0;
   let customerRe= 0;
   _.forEach(cohorst, (event, key) => {
-    period = 0;
+    period = 1;
     customerRe = 0;
     const resultConvert = alasql('SELECT * from ? WHERE cohort_period="'+ event.cohort_period + '"', [dataFile]); 
     for (let result of resultConvert) {  
