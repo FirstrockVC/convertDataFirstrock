@@ -202,6 +202,7 @@ app.get('/convertxlayer', (req, res) => {
   const report = [];
   const numberPeriod = cohorst.length;
   let periods= [];
+  let data = [];
   _.forEach(cohorst, (event, key) => {
     const resultConvert = alasql('SELECT * from ? WHERE cohort_period="'+ event.cohort_period + '"', [dataFile]); 
     for (let period of periods) { 
@@ -213,13 +214,22 @@ app.get('/convertxlayer', (req, res) => {
           });
       }
     }
-    for (let result of resultConvert) { 
-          report.push({
-          "cohort_period": event.cohort_period, 
-          "activity_period": result.activity_period,
-          "users": result.users,
-    });
+    for (let result of resultConvert) {
+      let comulative = 0;
+          for (let object of data){
+            if (object.activity_period === result.activity_period){
+              comulative += object.users;
+            }
+          } 
+          const cohort = {
+            "cohort_period": event.cohort_period, 
+            "activity_period": result.activity_period,
+            "users": result.users + comulative,
+          };
+          report.push(cohort);
+          data.push(cohort);
     }
+    data.push(resultConvert);
     periods.push(event.cohort_period);
   });
   res.send(report);
