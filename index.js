@@ -7,6 +7,7 @@ const _ = require('lodash');
 const csv_out = require('express-csv');
 const momentRange = require('moment-range');
 const moment = momentRange.extendMoment(Moment);
+const exec = require('child_process').exec;
 
 alasql.fn.moment = moment;
 const app = express();
@@ -72,6 +73,16 @@ app.use((req, res, next) => {
 // Initial API Endpoint
 app.get('/', (req, res) => {
   res.json({ api: 'V1.0', description: 'convert API'});
+});
+
+app.get('/childprocess', (req, res) => {
+const child = exec('Rscript ./hello.R mafe hola', (error, stdout, stderr) => {
+  if (error) {
+    console.error(`exec error: ${error}`)
+    return
+  }
+  res.json(stdout);
+});
 });
 
 app.post('/uploadFile', (req, res) => {
