@@ -8,11 +8,13 @@ const csv_out = require('express-csv');
 const momentRange = require('moment-range');
 const moment = momentRange.extendMoment(Moment);
 const exec = require('child_process').exec;
+const json2csv = require('json2csv');
+const fs = require('fs');
 
 alasql.fn.moment = moment;
 const app = express();
+let data = [];
 let dataFile = [];
-let file =[];
 
 /**
  * Wrapper method to convert CSV into JSON and format dates
@@ -20,21 +22,16 @@ let file =[];
  * @returns {Promise}
  */
 const csvjson = (data,type) => {
-  dataFile = [];  
+  data = [];  
   return new Promise((success, reject) => {
     // Transform CSV into JSON
     csv()
       .fromString(data)
       .on('json',(jsonObj)=>{
         if (type){
-          dataFile.push({
-            cohort_period: jsonObj.cohort_period,
-            activity_period: jsonObj.activity_period, 
-            users: Number(jsonObj.users),         
-            revenue: jsonObj.revenue
-          });
+          data.push(jsonObj);
         }else{
-          dataFile.push({
+          data.push({
             distinct_id: jsonObj.distinct_id,
             name: jsonObj.name, 
             time: jsonObj.time,         
@@ -52,25 +49,28 @@ const csvjson = (data,type) => {
   });
 };
 
-
-const stringcsv = (data) => {
-  file = [];
+const chillProcess = (data) => {
   return new Promise((success, reject) => {
-    csv()
-    .fromString(data)
-    .on('csv',(csvRow)=>{
-      file.push(csvRow)
-        console.log(csvRow)
-    })
-    .on('done',()=>{
-      if(error) {
-        reject(error);
-      } else {
-        success(file);
+    const fields = ['user', 'time'];
+    json2csv({ data: data, fields: fields, fieldNames: fields },(err, csv) => {
+      if(err) {
+        reject(err);
+      } else{
+        fs.writeFile('file.csv', csv, (err) =>{
+          if (err) throw err;
+          const child = exec('Rscript ./lambdak.R -f file.csv "month"', (error, stdout, stderr) => {
+            if(error) {
+              reject(error);
+            } else {
+              success(stdout)
+            }
+          });
+        });
       }
     });
   });
 };
+
 // Body parser configuration
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
@@ -95,22 +95,20 @@ app.get('/', (req, res) => {
   res.json({ api: 'V1.0', description: 'convert API'});
 });
 
-app.post('/childprocess', (req, res) => {
-  const body = req.body;
-  stringcsv(body.data)
-    .then((data) => {
-      res.send('bu');
-    }).catch((error) => {
-      res.status(500).send('Something broke!');
-    });
-});
 
 app.post('/uploadFile', (req, res) => {
 const body = req.body;
+dataFile = [];
 csvjson(body.data, body.type)
     .then((data) => {
       if (body.type){
-        res.send(data);        
+        chillProcess(data)
+        .then((stdout) => {
+          dataFile = JSON.parse(stdout);
+          res.json(JSON.parse(stdout));
+        }).catch((error) => {
+          res.status(500).send('Something broke!');
+        });      
       }else{
         const dataEvents = alasql('SELECT DISTINCT name from ?', [data]); 
         res.send(dataEvents);
