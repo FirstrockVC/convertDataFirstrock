@@ -54,12 +54,12 @@ const csvjson = (data,type) => {
 
 
 const stringcsv = (data) => {
-  file;
+  file = [];
   return new Promise((success, reject) => {
     csv()
     .fromString(data)
     .on('csv',(csvRow)=>{
-        dataFile.push(csvRow)
+      file.push(csvRow)
         console.log(csvRow)
     })
     .on('done',()=>{
