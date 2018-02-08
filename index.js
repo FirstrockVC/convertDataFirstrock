@@ -13,7 +13,7 @@ const fs = require('fs');
 
 alasql.fn.moment = moment;
 const app = express();
-let data = [];
+let dataJson = [];
 let dataFile = [];
 
 /**
@@ -22,16 +22,16 @@ let dataFile = [];
  * @returns {Promise}
  */
 const csvjson = (data,type) => {
-  data = [];  
+  dataJson = [];  
   return new Promise((success, reject) => {
     // Transform CSV into JSON
     csv()
       .fromString(data)
       .on('json',(jsonObj)=>{
         if (type){
-          data.push(jsonObj);
+          dataJson.push(jsonObj);
         }else{
-          data.push({
+          dataJson.push({
             distinct_id: jsonObj.distinct_id,
             name: jsonObj.name, 
             time: jsonObj.time,         
@@ -43,7 +43,7 @@ const csvjson = (data,type) => {
         if(error) {
           reject(error);
         } else {
-          success(dataFile);
+          success(dataJson);
         }
       })
   });
