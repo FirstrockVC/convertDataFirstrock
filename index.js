@@ -107,6 +107,7 @@ csvjson(body.data, true)
           dataFile = JSON.parse(stdout);
           res.json(JSON.parse(stdout));
         }).catch((error) => {
+          console.log('chl',error);
           res.status(500).send('Something broke!');
         });      
       }else{
@@ -114,6 +115,7 @@ csvjson(body.data, true)
         res.send(dataEvents);
       }
     }).catch((error) => {
+      console.log('json', error);
       res.status(500).send('Something broke!');
     });
 });
