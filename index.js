@@ -26,7 +26,7 @@ const csvjson = (data,type) => {
   return new Promise((success, reject) => {
     // Transform CSV into JSON
     csv()
-      .fromFile('./data.csv')
+      .fromString(data)
       .on('json',(jsonObj)=>{
         if (type){
           dataJson.push(jsonObj);
@@ -49,7 +49,7 @@ const csvjson = (data,type) => {
   });
 };
 
-const chillProcess = (data) => {
+const chillProcess = (data, period) => {
   return new Promise((success, reject) => {
     const fields = ['user', 'time'];
     json2csv({ data: data, fields: fields, fieldNames: fields },(err, csv) => {
@@ -58,7 +58,7 @@ const chillProcess = (data) => {
       } else{
         fs.writeFile('file.csv', csv, (err) =>{
           if (err) throw err;
-          const child = exec('Rscript ./lambdak.R -f file.csv "month"', (error, stdout, stderr) => {
+          const child = exec('Rscript ./lambdak.R -f file.csv "'+ period +'"', (error, stdout, stderr) => {
             if(error) {
               reject(error);
             } else {
@@ -96,27 +96,25 @@ app.get('/', (req, res) => {
 });
 
 
-app.get('/uploadFile', (req, res) => {
+app.post('/uploadFile', (req, res) => {
 const body = req.body;
 dataFile = [];
-csvjson(body.data, true)
+csvjson(body.data, body.type)
     .then((data) => {
       if (true){
-        chillProcess(data)
+        chillProcess(data, body.period)
         .then((stdout) => {
           dataFile = JSON.parse(stdout);
           res.json(JSON.parse(stdout));
         }).catch((error) => {
-          console.log('chl',error);
-          res.status(500).send('Something broke!');
+          res.status(500).send(error);
         });      
       }else{
         const dataEvents = alasql('SELECT DISTINCT name from ?', [data]); 
         res.send(dataEvents);
       }
     }).catch((error) => {
-      console.log('json', error);
-      res.status(500).send('Something broke!');
+      res.status(500).send(error);
     });
 });
 
