@@ -26,7 +26,7 @@ const csvjson = (data,type) => {
   return new Promise((success, reject) => {
     // Transform CSV into JSON
     csv()
-      .fromString(data)
+      .fromFile('./data.csv')
       .on('json',(jsonObj)=>{
         if (type){
           dataJson.push(jsonObj);
@@ -96,12 +96,12 @@ app.get('/', (req, res) => {
 });
 
 
-app.post('/uploadFile', (req, res) => {
+app.get('/uploadFile', (req, res) => {
 const body = req.body;
 dataFile = [];
-csvjson(body.data, body.type)
+csvjson(body.data, true)
     .then((data) => {
-      if (body.type){
+      if (true){
         chillProcess(data)
         .then((stdout) => {
           dataFile = JSON.parse(stdout);

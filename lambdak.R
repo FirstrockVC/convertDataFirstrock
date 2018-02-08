@@ -69,7 +69,7 @@ args = commandArgs(trailingOnly=TRUE)
       data_5<-data_5[,1:4]
       data_5[,1]<-format(data_5[,1],'%Y-%m-%d')
       data_5[,2]<-format(data_5[,2],'%Y-%m-%d')
-      colnames(data_5)<-c(paste("cohort_",period,sep=""),paste("activity_",period,sep=""),"users","revenue")
+      colnames(data_5)<-c(paste("cohort_period",sep=""),paste("activity_period",sep=""),"users","revenue")
       data_5<-toJSON(data_5, pretty = FALSE)
       prettify(data_5)
 } 
