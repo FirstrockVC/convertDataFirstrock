@@ -12,13 +12,14 @@ const exec = require('child_process').exec;
 alasql.fn.moment = moment;
 const app = express();
 let dataFile = [];
+let file =[];
 
 /**
  * Wrapper method to convert CSV into JSON and format dates
  * @param filename
  * @returns {Promise}
  */
-const csv2json = (data,type) => {
+const csvjson = (data,type) => {
   dataFile = [];  
   return new Promise((success, reject) => {
     // Transform CSV into JSON
@@ -51,6 +52,25 @@ const csv2json = (data,type) => {
   });
 };
 
+
+const stringcsv = (data) => {
+  file;
+  return new Promise((success, reject) => {
+    csv()
+    .fromString(data)
+    .on('csv',(csvRow)=>{
+        dataFile.push(csvRow)
+        console.log(csvRow)
+    })
+    .on('done',()=>{
+      if(error) {
+        reject(error);
+      } else {
+        success(file);
+      }
+    });
+  });
+};
 // Body parser configuration
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
@@ -75,19 +95,19 @@ app.get('/', (req, res) => {
   res.json({ api: 'V1.0', description: 'convert API'});
 });
 
-app.get('/childprocess', (req, res) => {
-const child = exec('Rscript ./hello.R mafe hola', (error, stdout, stderr) => {
-  if (error) {
-    console.error(`exec error: ${error}`)
-    return
-  }
-  res.json(stdout);
-});
+app.post('/childprocess', (req, res) => {
+  const body = req.body;
+  stringcsv(body.data)
+    .then((data) => {
+      res.send('bu');
+    }).catch((error) => {
+      res.status(500).send('Something broke!');
+    });
 });
 
 app.post('/uploadFile', (req, res) => {
 const body = req.body;
-  csv2json(body.data, body.type)
+csvjson(body.data, body.type)
     .then((data) => {
       if (body.type){
         res.send(data);        
