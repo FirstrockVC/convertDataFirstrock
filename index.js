@@ -101,7 +101,7 @@ const body = req.body;
 dataFile = [];
 csvjson(body.data, body.type)
     .then((data) => {
-      if (true){
+      if (body.type){
         chillProcess(data, body.period)
         .then((stdout) => {
           dataFile = JSON.parse(stdout);
