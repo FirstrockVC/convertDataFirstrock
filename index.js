@@ -10,6 +10,7 @@ const moment = momentRange.extendMoment(Moment);
 const exec = require('child_process').exec;
 const json2csv = require('json2csv');
 const fs = require('fs');
+const https = require('https');
 
 alasql.fn.moment = moment;
 const app = express();
@@ -265,6 +266,4 @@ app.get('/convertxlayer', (req, res) => {
   res.send(report);
 });
 
-app.listen(process.env.PORT || 3000, ()=> {
-  console.log('Example app listening on port 3000!');
-});
+https.createServer(app).listen(3000);
