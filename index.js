@@ -12,6 +12,11 @@ const json2csv = require('json2csv');
 const fs = require('fs');
 const https = require('https');
 
+var options = {
+  key: fs.readFileSync('privateKey.key'),
+  cert: fs.readFileSync('certificate.crt')
+};
+
 alasql.fn.moment = moment;
 const app = express();
 let dataJson = [];
@@ -266,4 +271,4 @@ app.get('/convertxlayer', (req, res) => {
   res.send(report);
 });
 
-https.createServer(app).listen(3000);
+https.createServer(options, app).listen(3000);
